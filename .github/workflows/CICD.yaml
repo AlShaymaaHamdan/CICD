@@ -158,5 +158,4 @@ jobs:
             username: ${{ secrets.HOST_NAME }}
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
-              chmod +x server_script.sh
-              ./server_script.sh
+              server_script.sh
