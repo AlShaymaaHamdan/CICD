@@ -114,7 +114,7 @@ jobs:
             - name: Extract app artifact
               run: |
                 mkdir -p app
-                ARTIFACT=$(ls nodeapp-${VERSION}-*.tgz | tail -n -1)
+                ARTIFACT=$(ls cicd-shaymaa-${VERSION}-*.tgz | tail -n -1)
                 echo $ARTIFACT
                 tar -xzf  "$ARTIFACT" -C app
               
@@ -136,7 +136,7 @@ jobs:
                 context: .
                 file: ./Dockerfile
                 push: true
-                tags: ${{ secrets.AWS_ECR_URI }}/nodeapp:${{ env.VERSION }}
+                tags: ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ env.VERSION }}
                 
     deploy:
       runs-on: ubuntu-latest
@@ -160,8 +160,8 @@ jobs:
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
               echo "pull image"
-              docker pull ${{ secrets.AWS_ECR_URI }}/nodeapp:${{ env.VERSION }}
+              docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ env.VERSION }}
 
-              docker stop nodeapp 
-              docker rm nodeapp
-              docker run -dp 81:3000 --name nodeapp ${{ secrets.AWS_ECR_URI }}/nodeapp:${{env.VERSION}}
+              docker stop cicd-shaymaa
+              docker rm cicd-shaymaa
+              docker run -dp 81:3000 --name cicd-shaymaa ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{env.VERSION}}

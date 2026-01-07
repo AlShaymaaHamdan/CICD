@@ -1,6 +1,6 @@
 {
   "name": "nodejs-app-for-testing-ansible",
-  "version": "7.8.9-test",
+  "version": "1.2.3-snapshot",
   "description": "",
   "main": "index.js",
   "scripts": {
