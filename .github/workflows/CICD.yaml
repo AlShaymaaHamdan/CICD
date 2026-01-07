@@ -102,7 +102,7 @@ jobs:
                VERSION=$(grep 'version' version.yaml | cut -d'"' -f2)
                echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-            - name: Debuugung the extracted Version
+            - name: Debugging the extracted Version
               run: echo $VERSION
 
             - name: Download artifact 
