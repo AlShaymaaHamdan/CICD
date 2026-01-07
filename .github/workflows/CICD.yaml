@@ -105,9 +105,9 @@ jobs:
             
             - name: Extract app artifact
               run: |
-                  chmod +x load_version.sh
-                  ./load_version.sh
-              
+                  chmod +x extract_artifact.sh
+                  ./extract_artifact.sh
+                  
             - name : Config AWS credentials
               uses: aws-actions/configure-aws-credentials@v4
               with:
