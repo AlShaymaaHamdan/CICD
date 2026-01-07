@@ -163,5 +163,6 @@ jobs:
 
               echo "pull image"
               docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ env.VERSION }}
-
+              docker stop cicd-shaymaa
+              docker rm cicd-shaymaa
               docker run -dp 3000:3000 --name cicd-shaymaa ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{env.VERSION}}
