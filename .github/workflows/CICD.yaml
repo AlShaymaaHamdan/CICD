@@ -169,9 +169,15 @@ jobs:
             username: ${{ secrets.HOST_NAME }}
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
+              echo "AWS CLI install"
+              sudo apt update
+              sudo apt upgrade -y
+              sudo apt install -y awscli
+
+              echo "ECR Login"
+              aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ env.VERSION }}
+              
               echo "pull image"
               docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ env.VERSION }}
 
-              docker stop cicd-shaymaa
-              docker rm cicd-shaymaa
               docker run -dp 81:3000 --name cicd-shaymaa ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{env.VERSION}}
