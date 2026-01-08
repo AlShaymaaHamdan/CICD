@@ -128,6 +128,8 @@ jobs:
     promote:
       runs-on: ubuntu-latest
       needs: docker
+      outputs:
+        BASE_TAG: ${{ steps.promote.outputs.BASE_TAG }}
       steps:
          - name: Checkout repo
            uses: actions/checkout@v4
@@ -143,6 +145,7 @@ jobs:
            uses: aws-actions/amazon-ecr-login@v2
 
          - name: Promote the latest test tag
+           id: promote
            env: 
               AWS_REGION: ${{ secrets.AWS_REGION }}
               AWS_ECR_URI: ${{ secrets.AWS_ECR_URI }}
@@ -174,12 +177,12 @@ jobs:
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
               echo "ECR Login"
-              aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ env.VERSION }}
+              aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
 
               echo "pull image"
-              docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ env.VERSION }}
+              docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:$BAS
               
               docker stop cicd-shaymaa
               docker rm cicd-shaymaa
               
-              docker run -dp 3000:3000 --name cicd-shaymaa ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{env.VERSION}}
+              docker run -dp 3000:3000 --name cicd-shaymaa ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
