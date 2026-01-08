@@ -146,10 +146,10 @@ jobs:
             --region us-west-2 \
             --output json \
             | jq -r '
-            .imageDetails[]
-            | select(.imageTags != null)
-            | select([.imageTags[] | contains("test")] | any)
-            | {pushedAt: .imagePushedAt, tag: (.imageTags[]) | select(contains("test")))}
+              .imageDetails[]
+              | select(.imageTags != null)
+              | select([.imageTags[] | contains("test")] | any)
+              | {pushedAt: .imagePushedAt, tag: (.imageTags[]) | select(contains("test")))}
             ' | jq -s 'sort_by(.pushedAt) | last.tag')
 
          - name: Remove quotations from latest test tag
