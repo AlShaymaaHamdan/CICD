@@ -134,7 +134,7 @@ CMD [ "node", "app.js" ]
 
 ## Deployment
 
-**Triggering the Pipeline**
+
 The pipeline triggers automatically on:
 * Push to main branch
 * Pull Request to main branch
