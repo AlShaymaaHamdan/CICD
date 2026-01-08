@@ -143,6 +143,9 @@ jobs:
            uses: aws-actions/amazon-ecr-login@v2
 
          - name: Promote the latest test tag
+           env: 
+              AWS_REGION: ${{ secrets.AWS_REGION }}
+              ECR_URI: ${{ secrets.ECR_URI }}
            run: chmod +x promote.sh
                 ./promote.sh
     
