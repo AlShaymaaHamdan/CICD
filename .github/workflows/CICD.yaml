@@ -155,7 +155,7 @@ jobs:
          - name: Remove quotations from latest test tag
            run: |
               LATEST_TAG=$(echo "$LATEST_TAG" | tr -d '"')
-              echo $LATEST_TAG
+              echo "$LATEST_TAG"
 
          - name: Pull Latest test tag
            run: |
@@ -164,7 +164,7 @@ jobs:
          - name: Save Base TAG
            run: |
               BASE_TAG=$(echo "$LATEST_TAG" | cut -d'-' -f1 | tr -d '"')
-              echo $BASE_TAG
+              echo "$BASE_TAG"
 
          - name: retag the latest test tag
            run: |
