@@ -146,7 +146,8 @@ jobs:
            env: 
               AWS_REGION: ${{ secrets.AWS_REGION }}
               AWS_ECR_URI: ${{ secrets.AWS_ECR_URI }}
-           run: chmod +x promote.sh
+           run: |
+                chmod +x promote.sh
                 ./promote.sh
     
     deploy:
