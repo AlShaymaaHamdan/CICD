@@ -18,14 +18,14 @@ LATEST_TAG=$(echo "$LATEST_TAG" | tr -d '"')
 echo "$LATEST_TAG"
 
 # Pull Latest test tag
-docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:$LATEST_TAG
+docker pull $AWS_ECR_URI/cicd-shaymaa:$LATEST_TAG
 
 # Save Base Tag
 BASE_TAG=$(echo "$LATEST_TAG" | cut -d'-' -f1 | tr -d '"')
 echo "$BASE_TAG"
 
 # retag the latest test tag
-docker tag ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:$LATEST_TAG ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:$BASE_TAG
+docker tag $AWS_ECR_URI/cicd-shaymaa:$LATEST_TAG $AWS_ECR_URI/cicd-shaymaa:$BASE_TAG
          
 # Push Base tag
-docker push ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:$BASE_TAG
+docker push $AWS_ECR_URI/cicd-shaymaa:$BASE_TAG
