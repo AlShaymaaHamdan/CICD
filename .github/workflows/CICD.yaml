@@ -142,15 +142,15 @@ jobs:
          - name: Save latest test tag
            run: |
             LATEST_TAG=$(aws ecr describe-images \
-            --repository-name cicd-shaymaa \
-            --region us-west-2 \
-            --output json \
-            | jq -r '
-              .imageDetails[]
-              | select(.imageTags != null)
-              | select([.imageTags[] | contains("test")] | any)
-              | {pushedAt: .imagePushedAt, tag: (.imageTags[]) | select(contains("test")))}
-            ' | jq -s 'sort_by(.pushedAt) | last.tag')
+              --repository-name cicd-aseel \
+              --region "$AWS_REGION" \
+              --output json \
+              | jq -r '
+                .imageDetails[]
+                | select(.imageTags != null)
+                | select([.imageTags[] | contains("test")] | any)
+                | {pushedAt: .imagePushedAt, tag: (.imageTags[] | select(contains("test")))}
+              ' | jq -s 'sort_by(.pushedAt) | last.tag')
 
          - name: Remove quotations from latest test tag
            run: |
