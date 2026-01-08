@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Save latest test tag
 LATEST_TAG=$(aws ecr describe-images \
     --repository-name cicd-aseel \
