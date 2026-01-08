@@ -1,6 +1,6 @@
 # Save latest test tag
 LATEST_TAG=$(aws ecr describe-images \
-    --repository-name cicd-aseel \
+    --repository-name cicd-shaymaa \
     --region "$AWS_REGION" \
     --output json \
     | jq -r '
