@@ -180,7 +180,7 @@ jobs:
               aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
 
               echo "pull image"
-              docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:$BAS
+              docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
               
               docker stop cicd-shaymaa
               docker rm cicd-shaymaa
