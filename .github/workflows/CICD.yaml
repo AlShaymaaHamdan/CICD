@@ -125,7 +125,55 @@ jobs:
                 file: ./Dockerfile
                 push: true
                 tags: ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ env.VERSION }}
-                
+    promote:
+      runs-on: ubuntu-latest
+      needs: docker
+      steps:
+         - name : Config AWS credentials
+           uses: aws-actions/configure-aws-credentials@v4
+           with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ secrets.AWS_REGION }}   
+            
+         - name: Login into AWS ecr
+           uses: aws-actions/amazon-ecr-login@v2
+
+         - name: Save latest test tag
+           run: |
+            LATEST_TAG=$(aws ecr describe-images \
+            --repository-name cicd-shaymaa \
+            --region us-west-2 \
+            --output json \
+            | jq -r '
+            .imageDetails[]
+            | select(.imageTags != null)
+            | select([.imageTags[] | contains("test")] | any)
+            | {pushedAt: .imagePushedAt, tag: (.imageTags[]) | select(contains("test")))}
+            ' | jq -s 'sort_by(.pushedAt) | last.tag')
+
+         - name: Remove quotations from latest test tag
+           run: |
+              LATEST_TAG=$(echo "$LATEST_TAG" | tr -d '"')
+              echo $LATEST_TAG
+
+         - name: Pull Latest test tag
+           run: |
+              docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:$LATEST_TAG
+
+         - name: Save Base TAG
+           run: |
+              BASE_TAG=$(echo "$LATEST_TAG" | cut -d'-' -f1 | tr -d '"')
+              echo $BASE_TAG
+
+         - name: retag the latest test tag
+           run: |
+              docker tag ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:$LATEST_TAG ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:$BASE_TAG
+         
+         - name: Push Base tag
+           run: |
+              docker push ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:$BASE_TAG
+    
     deploy:
       runs-on: ubuntu-latest
       needs: docker
@@ -141,15 +189,6 @@ jobs:
           run: |
             chmod +x load_version.sh
             ./load_version.sh
-        # - name : Config AWS credentials
-        #   uses: aws-actions/configure-aws-credentials@v4
-        #   with:
-        #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        #     aws-region: ${{ secrets.AWS_REGION }}   
-                
-        # - name: Login into AWS ecr
-        #   uses: aws-actions/amazon-ecr-login@v2
 
         - name: ssh to the server
           uses: appleboy/ssh-action@v1.0.3
