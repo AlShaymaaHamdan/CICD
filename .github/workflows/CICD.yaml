@@ -196,7 +196,7 @@ jobs:
       runs-on: ubuntu-latest
       if: github.ref == 'refs/heads/prod'
       needs:
-        - promot
+        - promote
         - push-promoted-image
       steps:
         - name: Checkout repo
