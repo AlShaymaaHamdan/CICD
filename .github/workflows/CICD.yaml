@@ -168,7 +168,8 @@ jobs:
                 echo "Latest_tag = $LATEST_TAG"
                 export BASE_TAG=$(echo "$LATEST_TAG" | cut -d'-' -f1 | tr -d '"')
                 echo "BASE_TAG=$BASE_TAG"
-                echo "LATEST_TAG = $LATEST_TAG" >> $GITHUB_OUTPUT
+                export LATEST_TAG=$LATEST_TAG
+                echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_OUTPUT
                 echo "BASE_TAG=$BASE_TAG" >> $GITHUB_OUTPUT
     push-promoted-image:
         runs-on: ubuntu-latest
@@ -183,7 +184,7 @@ jobs:
           run: |
             echo "LATEST_TAG=${{ needs.promote.outputs.LATEST_TAG }}"
             echo "BASE_TAG=${{ needs.promote.outputs.BASE_TAG }}"
-            
+
         - name : Config AWS credintails
           uses: aws-actions/configure-aws-credentials@v4
           with:
