@@ -179,6 +179,11 @@ jobs:
           LATEST_TAG: ${{ steps.promote.outputs.LATEST_TAG }}
         
         steps:
+        - name: Debug promote outputs
+          run: |
+            echo "LATEST_TAG=${{ needs.promote.outputs.LATEST_TAG }}"
+            echo "BASE_TAG=${{ needs.promote.outputs.BASE_TAG }}"
+            
         - name : Config AWS credintails
           uses: aws-actions/configure-aws-credentials@v4
           with:
