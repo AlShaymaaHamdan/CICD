@@ -187,10 +187,10 @@ jobs:
 
         - name: Pull and push the image 
           run: |
-              docker pull ${{ secrets.AWS_ECR_URL }}/nodeapp:: ${{ needs.promot.outputs.latest_tag }}
-              docker tag ${{ secrets.AWS_ECR_URL }}/nodeapp:: ${{ needs.promot.outputs.latest_tag }} /
-              ${{ secrets.AWS_ECR_URL }}/nodeapp:: ${{ needs.promot.outputs.base_tag }}
-              docker push ${{ secrets.AWS_ECR_URL }}/nodeapp:: ${{ needs.promot.outputs.base_tag }}
+              docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.LATEST_TAG }}
+              docker tag ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.LATEST_TAG }} /
+              ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
+              docker push ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
     
     deploy:
       runs-on: ubuntu-latest
@@ -219,7 +219,7 @@ jobs:
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
               echo "ECR Login"
-              aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
+              aws ecr get-login-password --region ${{ AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
 
               echo "pull image"
               docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
