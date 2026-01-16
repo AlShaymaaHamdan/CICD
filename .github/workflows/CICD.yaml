@@ -219,7 +219,7 @@ jobs:
             key: ${{ secrets.PRIVATE_KEY }}
             script: |
               echo "ECR Login"
-              aws ecr get-login-password --region ${{ AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
+              aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
 
               echo "pull image"
               docker pull ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ needs.promote.outputs.BASE_TAG }}
