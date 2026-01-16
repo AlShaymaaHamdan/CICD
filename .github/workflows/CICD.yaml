@@ -153,10 +153,9 @@ jobs:
               AWS_REGION: ${{ secrets.AWS_REGION }}
               AWS_ECR_URI: ${{ secrets.AWS_ECR_URI }}
            run: |
-                LATEST_TAG=$(aws ecr describe-images \
-                  --repository-name nodeapp \
-                  --region eu-central-1 \
-                  --output json \
+                --repository-name cicd-shaymaa \
+                --region "$AWS_REGION" \
+                --output json \
                 | jq -r '
                     .imageDetails[]
                     | select(.imageTags != null)
