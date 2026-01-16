@@ -2,7 +2,7 @@ name: Node js App
 
 on:
     push:
-        branches: [ main ]
+        branches: [ main, prod ] #main = QA 0.0.0-testing
     pull_request: 
         branches: [ main ]
 
@@ -29,18 +29,18 @@ jobs:
             name: version
             path: version.yaml
 
-    config_aws:
-      runs-on: ubuntu-latest
-      steps:
-        - name : Config AWS credentials
-          uses: aws-actions/configure-aws-credentials@v4
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: ${{ secrets.AWS_REGION }}   
+    # config_aws:
+    #   runs-on: ubuntu-latest
+    #   steps:
+    #     - name : Config AWS credentials
+    #       uses: aws-actions/configure-aws-credentials@v4
+    #       with:
+    #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #         aws-region: ${{ secrets.AWS_REGION }}   
             
-        - name: Login into AWS ecr
-          uses: aws-actions/amazon-ecr-login@v2
+    #     - name: Login into AWS ecr
+    #       uses: aws-actions/amazon-ecr-login@v2
     build:
       runs-on: ubuntu-latest
       needs: prepare
@@ -127,9 +127,12 @@ jobs:
                 tags: ${{ secrets.AWS_ECR_URI }}/cicd-shaymaa:${{ env.VERSION }}
     promote:
       runs-on: ubuntu-latest
+      if: github.ref == 'refs/heads/prod'
       needs: docker
       outputs:
         BASE_TAG: ${{ steps.promote.outputs.BASE_TAG }}
+        LATEST_TAG: ${{ steps.promote.outputs.LATEST_TAG }}
+
       steps:
          - name: Checkout repo
            uses: actions/checkout@v4
@@ -150,12 +153,51 @@ jobs:
               AWS_REGION: ${{ secrets.AWS_REGION }}
               AWS_ECR_URI: ${{ secrets.AWS_ECR_URI }}
            run: |
-                chmod +x promote.sh
-                ./promote.sh
+                LATEST_TAG=$(aws ecr describe-images \
+                  --repository-name nodeapp \
+                  --region eu-central-1 \
+                  --output json \
+                | jq -r '
+                    .imageDetails[]
+                    | select(.imageTags != null)
+                    | select([.imageTags[] | contains("test")] | any)
+                    | {pushedAt: .imagePushedAt, tag: (.imageTags[] | select(contains("test")))}
+                  ' | jq -s 'sort_by(.pushedAt) | last.tag')
+
+                LATEST_TAG=$(echo "$LATEST_TAG" | tr -d '"')
+                echo "Latest_tag = $LATEST_TAG"
+                export BASE_TAG=$(echo "$LATEST_TAG" | cut -d'-' -f1 | tr -d '"')
+                echo "BASE_TAG=$BASE_TAG"
+                echo "LATEST_TAG = $LATEST_TAG" >> $GITHUB_OUTPUT
+                echo "BASE_TAG=$BASE_TAG" >> $GITHUB_OUTPUT
+    push-promoted-image:
+        runs-on: ubuntu-latest
+        if: github.ref == 'refs/heads/prod'
+        needs: promote
+        steps:
+        - name : Config AWS credintails
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ secrets.AWS_REGION }} 
+
+        - name:  Login into AWS ecr
+          uses: aws-actions/amazon-ecr-login@v2
+
+        - name: Pull and push the image 
+          run: |
+              docker pull ${{ secrets.AWS_ECR_URL }}/nodeapp:: ${{ needs.promot.outputs.latest_tag }}
+              docker tag ${{ secrets.AWS_ECR_URL }}/nodeapp:: ${{ needs.promot.outputs.latest_tag }} /
+              ${{ secrets.AWS_ECR_URL }}/nodeapp:: ${{ needs.promot.outputs.base_tag }}
+              docker push ${{ secrets.AWS_ECR_URL }}/nodeapp:: ${{ needs.promot.outputs.base_tag }}
     
     deploy:
       runs-on: ubuntu-latest
-      needs: promote
+      if: github.ref == 'refs/heads/prod'
+      needs:
+        - promot
+        - push-promoted-image
       steps:
         - name: Checkout repo
           uses: actions/checkout@v4

@@ -22,12 +22,3 @@ docker pull $AWS_ECR_URI/cicd-shaymaa:$LATEST_TAG
 BASE_TAG=$(echo "$LATEST_TAG" | cut -d'-' -f1 | tr -d '"')
 echo "$BASE_TAG"
 
-# retag the latest test tag
-docker tag $AWS_ECR_URI/cicd-shaymaa:$LATEST_TAG $AWS_ECR_URI/cicd-shaymaa:$BASE_TAG
-         
-# Push Base tag
-docker push $AWS_ECR_URI/cicd-shaymaa:$BASE_TAG
-
-
-# Output for GitHub Actions
-echo "BASE_TAG=$BASE_TAG" >> "$GITHUB_OUTPUT"
